@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch:   # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,7 +30,18 @@ jobs:
           sed -i 's/\r$//' gradlew
           chmod +x gradlew
 
-      # 4. 缓存 Gradle 依赖
+      # 4. 打印环境信息用于诊断
+      - name: Print environment info
+        run: |
+          echo "=== Java Version ==="
+          java -version
+          echo "=== Android SDK Root ==="
+          echo $ANDROID_HOME
+          ls $ANDROID_HOME/platforms/ || echo "No platforms dir"
+          echo "=== Gradle Version ==="
+          ./gradlew --version
+
+      # 5. 缓存 Gradle 依赖
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -41,15 +52,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 5. 编译 Debug APK
+      # 6. 编译 Debug APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      # 6. 编译 Release APK（未签名）
+      # 7. 编译 Release APK（未签名）
       - name: Build Release APK
         run: ./gradlew assembleRelease --stacktrace
 
-      # 7. 上传 Debug APK 为 Artifact
+      # 8. 上传 Debug APK 为 Artifact
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -57,7 +68,7 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      # 8. 上传 Release APK 为 Artifact
+      # 9. 上传 Release APK 为 Artifact
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
