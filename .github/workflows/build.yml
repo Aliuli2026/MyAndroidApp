@@ -24,9 +24,11 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # 3. 授予 gradlew 执行权限
+      # 3. 授予 gradlew 执行权限并修复行尾格式
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: |
+          sed -i 's/\r$//' gradlew
+          chmod +x gradlew
 
       # 4. 缓存 Gradle 依赖
       - name: Cache Gradle packages
